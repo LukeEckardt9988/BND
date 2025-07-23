@@ -1,0 +1,444 @@
+
+.instructions {
+    flex: 1;
+    color: #ccc;
+    display: flex;
+    /* NEU: Ermöglicht flexible Boxen im Inneren */
+    flex-direction: column;
+    /* NEU: Ordnet Kind-Elemente untereinander an */
+}
+
+.console-parent-container {
+    /* NEU: Ein neuer Container für Konsole + Eingabe */
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.console-container {
+    flex-grow: 1;
+    /* Sorgt dafür, dass die Ausgabe den verfügbaren Platz füllt */
+    overflow-y: auto;
+    /* Nur die Ausgabe ist jetzt scrollbar */
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    padding: 20px;
+    border-radius: 5px 5px 0 0;
+    /* Oben abgerundet */
+}
+
+/* NEU: Custom Scrollbar für die Konsole (für Webkit-Browser wie Chrome, Edge, Safari) */
+.console-container::-webkit-scrollbar {
+    width: 8px;
+    /* Breite der Scrollbar */
+}
+
+.console-container::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    /* Hintergrund der Leiste */
+}
+
+.console-container::-webkit-scrollbar-thumb {
+    background-color: #555;
+    /* Farbe des Scroll-Balkens */
+    border-radius: 4px;
+    /* Abgerundete Ecken */
+    border: 2px solid #1a1a1a;
+    /* Ein kleiner Rand */
+}
+
+.console-container::-webkit-scrollbar-thumb:hover {
+    background-color: #777;
+    /* Farbe beim Darüberfahren */
+}
+
+.console-input-area {
+    display: flex;
+    padding: 10px;
+    background-color: #2a2a2a;
+    border: 1px solid #333;
+    border-top: 1px solid #555;
+    /* Trennlinie */
+    border-radius: 0 0 5px 5px;
+    /* Unten abgerundet */
+}
+
+#console-output {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* --- HINWEIS-BEREICH LINKS --- */
+.info-block {
+    /* NEU: Container für Missionshinweise */
+    margin-top: auto;
+    /* Schiebt den Block nach unten */
+    padding-top: 20px;
+}
+
+#hint-display {
+    /* NEU: Das eigentliche Fenster für die Hinweise */
+    background-color: #222;
+    border-left: 2px solid #f0e68c;
+    padding: 10px;
+    margin-top: 10px;
+    min-height: 50px;
+    color: #ccc;
+}
+
+/* --- Restliche Stile (bleiben größtenteils gleich) --- */
+.toolbox {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.program-btn {
+    background: #2a2a2a;
+    color: #00ff7f;
+    border: 1px solid #444;
+    padding: 10px;
+    cursor: pointer;
+    margin-right: 10px;
+    border-radius: 4px;
+    font-family: inherit;
+    transition: all 0.2s ease-in-out;
+}
+
+.program-btn.active {
+    border-color: #00ff7f;
+    box-shadow: 0 0 8px #00ff7f;
+}
+
+#command-explanation {
+    background-color: #222;
+    border-left: 2px solid #00ff7f;
+    padding: 10px;
+    margin-top: 10px;
+    min-height: 50px;
+}
+
+#command-dropdown,
+#argument-input {
+    background: #333;
+    color: #00ff7f;
+    border: 1px solid #555;
+    padding: 5px;
+    font-family: inherit;
+}
+
+#argument-input {
+    flex-grow: 1;
+    color: #fff;
+    margin-left: 5px;
+}
+
+#execute-btn {
+    background-color: #00ff7f;
+    color: #0d0d0d;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.prompt,
+.system-notification,
+.info-header {
+    color: #f0e68c;
+}
+
+@keyframes blink-animation {
+    0% {
+        box-shadow: 0 0 0px #fff;
+    }
+
+    50% {
+        box-shadow: 0 0 10px #fff;
+    }
+
+    100% {
+        box-shadow: 0 0 0px #fff;
+    }
+}
+
+.new-item-blink {
+    animation: blink-animation 0.7s 3;
+}
+
+.highlight-ip,
+.highlight-network {
+    color: #ffad57;
+    font-weight: bold;
+}
+
+.highlight-port {
+    color: #57e0ff;
+    font-weight: bold;
+}
+
+.highlight-location {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+.highlight-hint {
+    color: #f0e68c;
+    display: block;
+    margin-top: 5px;
+    border-left: 2px solid #f0e68c;
+    padding-left: 10px;
+}
+
+
+/* ######################################################## */
+/* ## STILE FÜR DAS MODAL-FENSTER (DEBRIEFING)      ## */
+/* ######################################################## */
+
+#modal-overlay { /* Wichtig: ID-Selektor # anstatt . */
+    position: fixed; /* Bleibt an Ort und Stelle, auch beim Scrollen */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Halb-transparenter schwarzer Hintergrund, etwas dunkler */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Sehr hoher z-index, Stellt sicher, dass es über allem anderen liegt */
+    backdrop-filter: blur(5px); /* NEU: Fügt den Blur-Effekt hinzu */
+    -webkit-backdrop-filter: blur(5px); /* Für Webkit-Browser */
+}
+
+#modal-content { /* Wichtig: ID-Selektor # anstatt . */
+    background-color: #1a1a1a;
+    color: #ccc;
+    padding: 30px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    width: 80%;
+    max-width: 600px; /* Begrenzt die maximale Breite des Modals */
+    max-height: 90vh; /* NEU: Begrenzt die maximale Höhe des Inhalts im Modal */
+    overflow-y: auto; /* NEU: Erlaubt Scrollen im Modal, wenn Inhalt zu lang ist */
+    box-shadow: 0 5px 25px rgba(0, 255, 127, 0.3); /* Leichter Schatten */
+    text-align: center;
+    display: flex; /* NEU: Für interne Layout-Kontrolle des Inhalts */
+    flex-direction: column; /* NEU: Ordnet den Inhalt vertikal an */
+}
+
+/* NEU: Stile für die Seiten im Modal (modal-page) */
+.modal-page {
+    margin-top: 20px; /* Abstand nach oben, wenn es nicht das erste Element ist */
+    text-align: left; /* Textausrichtung für den Inhalt */
+    /* Die hidden-Klasse steuert die Anzeige */
+}
+
+.modal-page:first-child {
+    margin-top: 0; /* Keine obere Marge für die erste Seite */
+}
+
+/* NEU: Stile für die Navigationsleiste im Modal */
+.modal-navigation {
+    display: flex;
+    justify-content: space-between; /* Pfeile und Indikator an den Enden und in der Mitte */
+    align-items: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #333; /* Trennlinie zur Abgrenzung vom Inhalt */
+}
+
+/* NEU: Stile für die Navigationspfeil-Buttons */
+.nav-arrow {
+    background-color: #00ff7f; /* Grün */
+    color: #0d0d0d; /* Dunkler Text */
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1em;
+    border-radius: 4px;
+    transition: background-color 0.2s; /* Glatter Übergang beim Hover */
+}
+
+.nav-arrow:hover:not(:disabled) {
+    background-color: #00e676; /* Etwas dunkleres Grün beim Hover */
+}
+
+.nav-arrow:disabled {
+    background-color: #555; /* Grauer Hintergrund, wenn deaktiviert */
+    color: #bbb; /* Hellerer Text, wenn deaktiviert */
+    cursor: not-allowed;
+    opacity: 0.6; /* Leicht transparent */
+}
+
+/* NEU: Stil für den Seitenindikator */
+#modal-page-indicator {
+    color: #00ff7f;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+/* NEU: Styling für den Code-Block im Modal */
+pre {
+    background-color: #0d0d0d;
+    border: 1px solid #333;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto; /* Horizontales Scrollen, falls Code zu lang ist */
+}
+
+code {
+    font-family: 'Courier New', Courier, monospace;
+    color: #00ff7f; /* Hellgrün für Code */
+}
+
+
+/* --- Restliche Stile (bleiben größtenteils gleich) --- */
+.toolbox {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.program-btn {
+    background: #2a2a2a;
+    color: #00ff7f;
+    border: 1px solid #444;
+    padding: 10px;
+    cursor: pointer;
+    margin-right: 10px;
+    border-radius: 4px;
+    font-family: inherit;
+    transition: all 0.2s ease-in-out;
+}
+
+.program-btn.active {
+    border-color: #00ff7f;
+    box-shadow: 0 0 8px #00ff7f;
+}
+
+#command-explanation {
+    background-color: #222;
+    border-left: 2px solid #00ff7f;
+    padding: 10px;
+    margin-top: 10px;
+    min-height: 50px;
+}
+
+#command-dropdown,
+#argument-input {
+    background: #333;
+    color: #00ff7f;
+    border: 1px solid #555;
+    padding: 5px;
+    font-family: inherit;
+}
+
+#argument-input {
+    flex-grow: 1;
+    color: #fff;
+    margin-left: 5px;
+}
+
+#execute-btn {
+    background-color: #00ff7f;
+    color: #0d0d0d;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.prompt,
+.system-notification,
+.info-header {
+    color: #f0e68c;
+}
+
+@keyframes blink-animation {
+    0% {
+        box-shadow: 0 0 0px #fff;
+    }
+
+    50% {
+        box-shadow: 0 0 10px #fff;
+    }
+
+    100% {
+        box-shadow: 0 0 0px #fff;
+    }
+}
+
+.new-item-blink {
+    animation: blink-animation 0.7s 3;
+}
+
+.highlight-ip,
+.highlight-network {
+    color: #ffad57;
+    font-weight: bold;
+}
+
+.highlight-port {
+    color: #57e0ff;
+    font-weight: bold;
+}
+
+.highlight-location {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+.highlight-hint {
+    color: #f0e68c;
+    display: block;
+    margin-top: 5px;
+    border-left: 2px solid #f0e68c;
+    padding-left: 10px;
+}
+
+.modal-content img {
+    max-width: 150px; /* Bildgröße anpassen */
+    margin-bottom: 20px;
+}
+
+.modal-content p {
+    text-align: left;
+    line-height: 1.6;
+}
+
+.modal-buttons {
+    margin-top: 30px;
+}
+
+.modal-buttons button {
+    background-color: #00ff7f;
+    color: #0d0d0d;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1em;
+    margin: 0 10px;
+}
+
+/* --- STILE FÜR DEN LEUCHTENDEN PFEIL --- */
+@keyframes glowing-arrow-animation {
+    0%   { text-shadow: 0 0 5px #00ff7f; }
+    50%  { text-shadow: 0 0 20px #00ff7f, 0 0 30px #fff; }
+    100% { text-shadow: 0 0 5px #00ff7f; }
+}
+
+.glowing-arrow {
+    display: inline-block;
+    color: #fff;
+    font-size: 2em;
+    text-decoration: none;
+    margin-top: 15px;
+    cursor: pointer;
+    animation: glowing-arrow-animation 2s infinite;
+}
+
+.hidden {
+    display: none !important; /* Eine einfache Klasse, um Elemente zu verstecken - mit !important, um Überschreibungen zu erzwingen */
+}

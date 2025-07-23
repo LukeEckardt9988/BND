@@ -1,0 +1,271 @@
+/* level2.css - Spezifische Stile für die Phishing-Mission und E-Mails */
+
+/* Neuer Wrapper für die gesamte Seite, um Margin/Padding am Rand zu erzeugen */
+.main-content-wrapper {
+    padding: 20px; /* Oder wie viel Abstand Sie möchten */
+    height: calc(100vh - 80px); /* Annahme: 80px für den Header */
+    box-sizing: border-box;
+}
+
+/* Gesamtlayout für E-Mails und Inhalt */
+.level2-main-content {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    height: 100%; /* Passt sich an den main-content-wrapper an */
+}
+
+/* E-Mail Posteingangsliste */
+.email-list {
+    flex: 1; /* Nimmt einen Anteil des verfügbaren Platzes ein */
+    min-width: 280px; /* Mindestbreite für die Liste */
+    padding: 20px;
+    overflow-y: auto;
+    border-right: 1px solid #333;
+    background-color: #1a1a1a;
+    border-radius: 5px;
+}
+
+.email-item {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    position: relative; /* Für den 'ungelesen'-Indikator */
+}
+
+.email-item:hover {
+    background-color: #3a3a3a;
+}
+
+/* Stil für ungelesene E-Mails */
+.email-item.unread {
+    background-color: #20202a; /* Etwas dunklerer Hintergrund */
+    border-color: #f0e68c; /* Gelber Rand */
+    box-shadow: 0 0 5px rgba(240, 230, 140, 0.4);
+    font-weight: bold; /* Optional: Fettgedruckter Text */
+}
+
+.email-item.unread:hover {
+    background-color: #2a2a3a; /* Leichter Hover-Effekt für ungelesen */
+}
+
+
+.email-item.selected {
+    background-color: #3a3a3a;
+    border-color: #00ff7f; /* Grünlicher Rand bei Auswahl */
+    box-shadow: 0 0 8px rgba(0, 255, 127, 0.7); /* Intensiverer Schatten bei Auswahl */
+}
+
+.email-subject {
+    font-weight: bold;
+    color: #00ff7f; /* Grün */
+}
+
+.email-sender {
+    font-size: 0.9em;
+    color: #bbb;
+}
+
+/* Versteckter E-Mail-Inhalt in der Liste (wird nur im Anzeigebereich geladen) */
+.hidden-email-content {
+    display: none; /* Macht den Inhalt in der E-Mail-Liste unsichtbar */
+}
+
+
+/* E-Mail Inhaltsanzeige (rechter Bereich) */
+.email-content-display {
+    flex: 3; /* Nimmt den Großteil des Platzes ein */
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 5px;
+    position: relative;
+    display: flex; /* Flexbox für den Inhalt selbst */
+    flex-direction: column; /* Elemente untereinander */
+}
+
+.email-full-content {
+    flex-grow: 1; /* Lässt den Inhalt den verfügbaren Platz füllen */
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    min-height: 200px; /* Mindesthöhe, auch wenn leer */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #e0e0e0;
+}
+.email-full-content .email-header {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+
+.email-full-content a {
+    color: #57e0ff;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* ... (Bestehende Modal-Stile für #phishing-analysis-modal-overlay und #phishing-analysis-modal-content) ... */
+/* Stellen Sie sicher, dass diese Stile noch in level2.css vorhanden sind */
+
+#phishing-analysis-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    /* display: none; */ /* Dies wird von der .hidden Klasse gesteuert */
+}
+
+#phishing-analysis-modal-content {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    padding: 20px 30px;
+    border-radius: 8px;
+    border: 1px solid #00ff7f;
+    width: 90%;
+    max-width: 950px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 0 30px rgba(0, 255, 127, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+#phishing-analysis-modal-content h2 {
+    color: #00ff7f;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#phishing-analysis-modal-content .analysis-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+#phishing-analysis-modal-content .analysis-panel {
+    flex: 1;
+    min-width: 300px;
+    background-color: #0d0d0d;
+    border: 1px solid #333;
+    padding: 15px;
+    border-radius: 4px;
+    min-height: 250px;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+#phishing-analysis-modal-content .analysis-panel h3 {
+    color: #f0e68c;
+    margin-top: 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+}
+
+#phishing-analysis-modal-content .analysis-panel strong {
+    color: #00ff7f;
+}
+
+#phishing-analysis-modal-content .red-flag {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+#phishing-analysis-modal-content .highlight-ip,
+#phishing-analysis-modal-content .highlight-sha {
+    color: #57e0ff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#phishing-analysis-modal-content .highlight-ip:hover,
+#phishing-analysis-modal-content .highlight-sha:hover {
+    text-decoration: underline;
+}
+
+#phishing-analysis-modal-content .info-text {
+    color: #bbb;
+    margin-top: 15px;
+    border-top: 1px solid #333;
+    padding-top: 15px;
+    font-size: 0.85em;
+}
+
+#phishing-analysis-modal-content .modal-close-btn {
+    align-self: flex-end;
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 1em;
+    transition: background-color 0.2s;
+}
+#phishing-analysis-modal-content .modal-close-btn:hover {
+    background-color: #cc3333;
+}
+
+/* Spezielle Stile für Pre-Tags im Modal */
+#phishing-analysis-modal-content pre {
+    background-color: #0d0d0d;
+    border: 1px solid #222;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+    color: #00ff7f;
+    font-size: 0.85em;
+}
+
+/* Header-Stile von style.css werden hier angewendet */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #444;
+    padding: 1rem 20px; /* Padding für den Header */
+    margin-bottom: 0; /* Kein Boden-Margin, da Wrapper es steuert */
+    background-color: #1a1a1a; /* Hintergrund für den Header */
+}
+
+.header h1 {
+    color: #00ff7f;
+    margin: 0;
+}
+
+.header a {
+    color: #e0e0e0;
+    text-decoration: none;
+    background-color: #2a2a2a;
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: 1px solid #444;
+}
+
+.header a:hover {
+    background-color: #3a3a3a;
+    text-decoration: none;
+}
+
+/* Allgemein nützliche Klasse */
+.hidden {
+    display: none !important; /* Wichtig für JS-Toggle */
+}

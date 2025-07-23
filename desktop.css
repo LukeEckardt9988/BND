@@ -1,0 +1,269 @@
+  /* CSS direkt hier, um Fehlerquellen auszuschließen */
+  html,
+  body {
+      overflow: hidden;
+      height: 100%;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+  }
+
+  #desktop {
+      height: 100%;
+      width: 100%;
+      background: #0d0d0d url('image/desktop-background.jpg') no-repeat center center;
+      background-size: cover;
+      position: relative;
+      padding: 20px;
+      box-sizing: border-box;
+  }
+
+  .desktop-icon {
+      width: 100px;
+      text-align: center;
+      color: white;
+      cursor: pointer;
+      margin-bottom: 20px;
+  }
+
+  .desktop-icon img {
+      width: 64px;
+      height: 64px;
+  }
+
+  .desktop-icon span {
+      display: block;
+      text-shadow: 1px 1px 2px #000;
+  }
+
+  .hidden {
+      display: none !important;
+  }
+
+  .window-container {
+      position: absolute;
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+  }
+
+  #console-window {
+      top: 50px;
+      left: 50px;
+      width: 700px;
+      height: 400px;
+      z-index: 100;
+  }
+
+  #emails-window {
+      top: 100px;
+      left: 100px;
+      width: 850px;
+      height: 600px;
+      z-index: 100;
+  }
+
+  .window-header {
+      background: #2a2a2a;
+      color: #e0e0e0;
+      padding: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: move;
+  }
+
+  .win-btn {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 25px;
+      height: 25px;
+  }
+
+  .window-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+  }
+
+  #console-window .window-content {
+      padding: 5px;
+      font-family: 'Courier New', Courier, monospace;
+      background-color: #131313;
+  }
+
+  .console-output-area {
+      flex-grow: 1;
+      overflow-y: auto;
+      white-space: pre-wrap;
+  }
+
+  .console-input-line {
+      display: flex;
+      align-items: center;
+      border-top: 1px solid #333;
+      padding-top: 5px;
+  }
+
+  .console-input-line .prompt {
+      color: #f0e68c;
+      margin-right: 5px;
+  }
+
+  .console-input-line .console-input {
+      flex-grow: 1;
+      background: transparent;
+      border: none;
+      color: #00ff7f;
+      outline: none;
+      font-size: 1em;
+  }
+
+  /* Styling für die Taskleiste */
+  #taskbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      background: #1a1a1a;
+      border-top: 1px solid #333;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      box-sizing: border-box;
+      z-index: 9999;
+  }
+
+  #taskbar .logout-link {
+      color: #e0e0e0;
+      text-decoration: none;
+      margin-left: auto;
+      /* Schiebt den Link nach ganz rechts */
+  }
+
+  #taskbar .logout-link:hover {
+      text-decoration: underline;
+  }
+
+  /* Wichtige Anpassung für den Desktop-Bereich */
+  #desktop {
+      height: calc(100% - 40px);
+      /* Schafft Platz für die Taskleiste */
+  }
+
+  /* NEU: Styling für die Anfasser zur Größenänderung */
+  .resizer {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: transparent;
+      /* Unsichtbar */
+      z-index: 10;
+      /* Über dem Fensterinhalt */
+  }
+
+  /* Positionierung der Anfasser */
+  .resizer.top {
+      top: -5px;
+      left: 5px;
+      right: 5px;
+      height: 10px;
+      cursor: n-resize;
+  }
+
+  .resizer.bottom {
+      bottom: -5px;
+      left: 5px;
+      right: 5px;
+      height: 10px;
+      cursor: s-resize;
+  }
+
+  .resizer.left {
+      left: -5px;
+      top: 5px;
+      bottom: 5px;
+      width: 10px;
+      cursor: w-resize;
+  }
+
+  .resizer.right {
+      right: -5px;
+      top: 5px;
+      bottom: 5px;
+      width: 10px;
+      cursor: e-resize;
+  }
+
+  /* Ecken */
+  .resizer.top-left {
+      top: -5px;
+      left: -5px;
+      cursor: nwse-resize;
+  }
+
+  .resizer.top-right {
+      top: -5px;
+      right: -5px;
+      cursor: nesw-resize;
+  }
+
+  .resizer.bottom-left {
+      bottom: -5px;
+      left: -5px;
+      cursor: nesw-resize;
+  }
+
+  .resizer.bottom-right {
+      bottom: -5px;
+      right: -5px;
+      cursor: nwse-resize;
+  }
+
+  /* In desktop.css hinzufügen */
+  [data-window-id="browser"] {
+      top: 150px;
+      left: 150px;
+  }
+
+
+  /* NEU: Styling für das Benachrichtigungs-Popup */
+  #notification-window {
+      position: absolute;
+      bottom: 60px;
+      /* Über der Taskleiste */
+      right: 20px;
+      width: 350px;
+      background-color: #2a2a2a;
+      border: 1px solid #00ff7f;
+      box-shadow: 0 0 20px rgba(0, 255, 127, 0.5);
+      z-index: 10000;
+      border-radius: 5px;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', sans-serif;
+      transform: translateX(120%);
+      transition: transform 0.5s ease-in-out;
+  }
+
+  #notification-window.visible {
+      transform: translateX(0%);
+  }
+
+  #notification-header {
+      background-color: #00ff7f;
+      color: #0d0d0d;
+      padding: 8px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+  }
+
+  #notification-body {
+      padding: 15px;
+      line-height: 1.6;
+  }
