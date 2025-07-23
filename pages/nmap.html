@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>BND Nmap Handbuch</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        /* Spezifische Stile für diese Seite */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #1a1a1a;
+            /* Dunkler Hintergrund passend zum Desktop */
+            color: #e0e0e0;
+            /* Helle Schriftfarbe */
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background-color: #2a2a2a;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .header img {
+            max-width: 250px;
+            /* Größe des Nmap Logos anpassen */
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            color: #00ff7f;
+            /* BND-Grün */
+            margin: 0;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 5px rgba(0, 255, 127, 0.3);
+        }
+
+        .content {
+            padding: 25px;
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #0d0d0d;
+            /* Noch dunklerer Bereich für den Inhalt */
+            border: 1px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.2);
+        }
+
+        .content h2 {
+            color: #00ff7f;
+            border-bottom: 2px solid #00ff7f;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+
+        .content h3 {
+            color: #f0e68c;
+            /* Gelblicher Ton für Überschriften */
+            margin-top: 20px;
+        }
+
+        .command-section {
+            background-color: #111;
+            border: 1px solid #222;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .command-section p {
+            line-height: 1.6;
+            margin-bottom: 5px;
+        }
+
+        .command-code {
+            background-color: #0d0d0d;
+            border: 1px solid #333;
+            color: #00ff7f;
+            padding: 8px 12px;
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 5px;
+            word-wrap: break-word;
+            /* Für lange Befehle */
+            white-space: pre-wrap;
+            /* Für Zeilenumbrüche innerhalb des Codes */
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        ul li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        ul li::before {
+            content: "•";
+            color: #00ff7f;
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <img src="../image/nmap.jpg" alt="Nmap Logo">
+        <h1>BND Nmap Handbuch</h1>
+        <p>Ein Leitfaden für Agenten zur Netzwerkerkundung</p>
+        <a href="https://nmap.org/">Echte Nmap Seite*</a>
+    </div>
+
+    <div class="content">
+        <p>
+            <strong>Nmap (Network Mapper)</strong> ist ein unverzichtbares Open-Source-Tool für jeden Cyber-Agenten. Es
+            dient der Netzwerkerkundung, Sicherheitsprüfung und der Erkennung von Geräten und Diensten. Stell es dir vor
+            wie einen leistungsstarken Scanner, der dir Einblicke in unbekannte Netzwerke verschafft.
+        </p>
+
+        <h2>Grundlagen und Befehls-Struktur</h2>
+        <div class="command-section">
+            <p>Ein typischer Nmap-Befehl folgt dieser Struktur:</p>
+            <span class="command-code">nmap [Scan-Typ(en)] [Optionen] {Ziel}</span>
+            <p><strong>Ziel:</strong> Kann eine IP-Adresse, ein Hostname oder ein Netzwerkbereich sein.</p>
+            <p>Beispiele: <code>10.0.10.5</code>, <code>www.beispiel.de</code>, <code>10.0.10.0/24</code></p>
+        </div>
+
+        <h2>Wichtige Scan-Typen und Optionen</h2>
+
+        <h3>Host-Entdeckung (Hosts finden)</h3>
+        <div class="command-section">
+            <p>Findet aktive Hosts in einem Netzwerk, ohne Ports zu scannen. Sehr schnell.</p>
+            <ul>
+                <li>Befehl: <span class="command-code">nmap -sn [Netzwerk/24]</span></li>
+                <li>Beispiel: <span class="command-code">nmap -sn 10.0.10.0/24</span></li>
+            </ul>
+        </div>
+
+        <h3>Port-Scan Techniken (Offene Türen entdecken)</h3>
+        <div class="command-section">
+            <p>Führt einen schnellen Standard-Port-Scan auf dem Ziel durch, um offene TCP-Ports zu finden.</p>
+            <ul>
+                <li>Befehl: <span class="command-code">nmap [IP-Adresse]</span></li>
+                <li>Beispiel: <span class="command-code">nmap 10.0.10.13</span></li>
+                <li>Spezifischen Port scannen: <span class="command-code">nmap -p [Portnummer] [IP-Adresse]</span></li>
+                <li>Alle Ports scannen: <span class="command-code">nmap -p- [IP-Adresse]</span></li>
+            </ul>
+        </div>
+
+        <h3>Service- und Versions-Erkennung (-sV)</h3>
+        <div class="command-section">
+            <p>Untersucht die offenen Ports, um herauszufinden, welche Software (und welche Version) dort läuft.
+                Entscheidend, um Schwachstellen zu identifizieren.</p>
+            <ul>
+                <li>Befehl: <span class="command-code">nmap -sV [IP-Adresse]</span></li>
+                <li>Beispiel: <span class="command-code">nmap -sV 10.0.10.13</span></li>
+            </ul>
+        </div>
+
+        <h3>Aggressiver Scan (-A)</h3>
+        <div class="command-section">
+            <p>Eine mächtige All-in-One-Option. Kombiniert Port-Scan, Service-Erkennung (-sV) und
+                Betriebssystem-Erkennung (-O) für eine umfassende Analyse. Kann auch Traceroute enthalten.</p>
+            <ul>
+                <li>Befehl: <span class="command-code">nmap -A [IP-Adresse]</span></li>
+                <li>Beispiel: <span class="command-code">nmap -A 10.0.10.13</span></li>
+            </ul>
+        </div>
+
+        <h3>Betriebssystem-Erkennung (-O)</h3>
+        <div class="command-section">
+            <p>Versucht herauszufinden, welches Betriebssystem (z.B. Windows, Linux) auf dem Ziel läuft.</p>
+            <ul>
+                <li>Befehl: <span class="command-code">nmap -O [IP-Adresse]</span></li>
+                <li>Beispiel: <span class="command-code">nmap -O 10.0.10.13</span></li>
+            </ul>
+        </div>
+
+        <h2>Wichtiger Hinweis</h2>
+        <p>
+            Nutze Nmap immer verantwortungsvoll und scanne nur Netzwerke, für die du die ausdrückliche Erlaubnis hast.
+            Unautorisierte Scans sind illegal und können schwerwiegende Konsequenzen haben. Im BND-Training agierst du
+            stets im Rahmen der Dienstvorschriften.
+        </p>
+    </div>
+</body>
+
+</html>

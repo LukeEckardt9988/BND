@@ -10,7 +10,7 @@
   #desktop {
       height: 100%;
       width: 100%;
-      background: #0d0d0d url('image/desktop-background.jpg') no-repeat center center;
+      background: #0d0d0d url('image/desktop-background.png') no-repeat center center;
       background-size: cover;
       position: relative;
       padding: 20px;
@@ -57,6 +57,13 @@
   }
 
   #emails-window {
+      top: 100px;
+      left: 100px;
+      width: 850px;
+      height: 600px;
+      z-index: 100;
+  }
+   #browser-window {
       top: 100px;
       left: 100px;
       width: 850px;
@@ -227,8 +234,8 @@
 
   /* In desktop.css hinzufügen */
   [data-window-id="browser"] {
-      top: 150px;
-      left: 150px;
+      top: 350px;
+      left: 450px;
   }
 
 

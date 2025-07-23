@@ -29,6 +29,7 @@ require 'db_connect.php';
             <img src="https://img.icons8.com/ios-filled/100/00ff7f/internet.png" alt="browser" />
             <span>Browser</span>
         </div>
+        
 
         <div id="console-window" class="window-container hidden">
             <div class="window-header"><span>BND Secure Terminal</span><button class="win-btn" data-window-id="console-window">X</button></div>
