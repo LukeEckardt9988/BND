@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 23. Jul 2025 um 07:25
+-- Erstellungszeit: 23. Jul 2025 um 09:25
 -- Server-Version: 10.4.32-MariaDB
 -- PHP-Version: 8.2.12
 
@@ -108,7 +108,8 @@ INSERT INTO `emails` (`id`, `recipient_id`, `sender_id`, `sender_name`, `sender_
 (6, 4, NULL, 'admin', 'system@bnd.de', 'dfg', 'dfg', '2025-07-22 12:42:14', 0, NULL, NULL, 0),
 (7, 4, NULL, 'admin', 'system@bnd.de', 'dfg', 'Hallo luke was geht ab', '2025-07-22 13:00:24', 0, NULL, NULL, 0),
 (8, 3, 4, 'Luki', 'luke.eckardt.mail@gmail.com', 'fgh', 'fghfgh', '2025-07-22 14:03:29', 0, NULL, NULL, 0),
-(9, 201, 4, 'Luki', 'luke.eckardt.mail@gmail.com', 'sicherheitsreleve', 'djflsnd ölsdnjg sl,gj nbs', '2025-07-22 14:05:32', 0, NULL, NULL, 0);
+(9, 201, 4, 'Luki', 'luke.eckardt.mail@gmail.com', 'sicherheitsreleve', 'djflsnd ölsdnjg sl,gj nbs', '2025-07-22 14:05:32', 0, NULL, NULL, 0),
+(10, 4, 100, 'Ausbilder Schmidt', 'schmidt@bnd.de', 'Willkommen beim BND, Rekrut!', 'Willkommen bei der Cyber-Abwehr. Ihre erste Aufgabe wartet auf Sie. Machen Sie sich mit dem System vertraut. Weitere Anweisungen folgen in Kürze.', '2025-07-23 09:15:57', 0, NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -144,6 +145,28 @@ CREATE TABLE `malware` (
   `description` text NOT NULL,
   `effect_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`effect_json`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `mission_progress`
+--
+
+CREATE TABLE `mission_progress` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `mission_id` int(11) NOT NULL,
+  `current_step` int(11) NOT NULL DEFAULT 1,
+  `is_completed` tinyint(1) NOT NULL DEFAULT 0,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Daten für Tabelle `mission_progress`
+--
+
+INSERT INTO `mission_progress` (`id`, `user_id`, `mission_id`, `current_step`, `is_completed`, `updated_at`) VALUES
+(1, 4, 1, 1, 0, '2025-07-23 07:15:57');
 
 -- --------------------------------------------------------
 
@@ -195,7 +218,8 @@ INSERT INTO `player_devices` (`id`, `user_id`, `hostname`, `os_type`, `gateway_i
 (10, 47, 'raspberry-pi', 'Raspbian', NULL, NULL, '{\"1883\":{\"status\":\"open\", \"service\":\"mqtt\"}, \"22\":{\"status\":\"open\", \"service\":\"ssh\"}}', '[]', '[]', NULL),
 (11, 48, 'darkbox', 'Kali Linux', NULL, NULL, '{\"1337\":{\"status\":\"open\", \"service\":\"waste\"}, \"3128\":{\"status\":\"open\", \"service\":\"squid-proxy\"}}', '[]', '[]', '2025-07-22 13:33:55 - Eingehender Port-Scan von IP 10.0.10.254\n'),
 (12, 200, 'unknown-device.cia-training.net', 'Windows Server 2012', NULL, NULL, '{\"80\":{\"status\":\"open\", \"service\":\"http-XAMPP\"}, \"1337\":{\"status\":\"open\", \"service\":\"trojan-BlackWidow_v1.3\"}}', '[]', '[]', 'TRACEROUTE ZUM KONTROLLSERVER\nHOP RTT      ADRESSE\n1   1.32 ms  gateway.cia-training.net (10.0.10.1)\n2   15.45 ms msk-ix.ru (Moskau, RU) <-- VERBINDUNG BESTÄTIGT\n3   25.11 ms target-node.fsb.internal (10.0.10.13)'),
-(13, 201, 'admin-pc', 'Linux', '192.168.2.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36', '{\"22\":{\"status\":\"closed\"}, \"80\":{\"status\":\"closed\"}}', '[]', '[]', NULL);
+(13, 201, 'admin-pc', 'Linux', '192.168.2.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36', '{\"22\":{\"status\":\"closed\"}, \"80\":{\"status\":\"closed\"}}', '[]', '[]', NULL),
+(14, 101, 'unknown-device', 'RouterOS', NULL, NULL, '{\"80\":{\"status\":\"open\", \"service\":\"http\"}, \"1337\":{\"status\":\"open\", \"service\":\"backdoor_trojan\"}}', '[]', '[]', NULL);
 
 -- --------------------------------------------------------
 
@@ -250,6 +274,8 @@ INSERT INTO `users` (`id`, `username`, `password_hash`, `email`, `ip_address`, `
 (47, 'IoT_Fan', '$2y$10$dummyhash', 'iot@example.com', '10.0.10.10', NULL, '2025-07-22 09:23:59'),
 (48, 'ShadySam', '$2y$10$dummyhash', 'sam@example.com', '10.0.10.11', NULL, '2025-07-22 09:23:59'),
 (49, 'NormalNancy', '$2y$10$dummyhash', 'nancy@example.com', '10.0.10.12', NULL, '2025-07-22 09:23:59'),
+(100, 'Ausbilder Schmidt', 'no_login', 'schmidt@bnd.de', '10.1.1.1', NULL, '2025-07-23 07:01:20'),
+(101, 'unauthorized_device', 'no_login', 'unknown@unauthorized.net', '10.2.2.15', NULL, '2025-07-23 07:01:32'),
 (200, 'fsb_trojan_operator', 'not_loggable_in', 'npc@fsb.internal', '10.0.10.13', 12, '2025-07-22 09:37:34'),
 (201, 'admin', '$2y$10$G.7wuZxT33zsWCLtQEwELeZFutRoe9xITbtacOD18yTS6JOKisz/G', 'admin@bnd.de', '10.0.10.254', 13, '2025-07-22 09:44:46');
 
@@ -301,6 +327,13 @@ ALTER TABLE `levels`
 --
 ALTER TABLE `malware`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indizes für die Tabelle `mission_progress`
+--
+ALTER TABLE `mission_progress`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indizes für die Tabelle `npc_actors`
@@ -357,7 +390,7 @@ ALTER TABLE `commands`
 -- AUTO_INCREMENT für Tabelle `emails`
 --
 ALTER TABLE `emails`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT für Tabelle `levels`
@@ -372,6 +405,12 @@ ALTER TABLE `malware`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT für Tabelle `mission_progress`
+--
+ALTER TABLE `mission_progress`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT für Tabelle `npc_actors`
 --
 ALTER TABLE `npc_actors`
@@ -381,7 +420,7 @@ ALTER TABLE `npc_actors`
 -- AUTO_INCREMENT für Tabelle `player_devices`
 --
 ALTER TABLE `player_devices`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT für Tabelle `programs`
@@ -404,6 +443,12 @@ ALTER TABLE `users`
 --
 ALTER TABLE `commands`
   ADD CONSTRAINT `commands_ibfk_1` FOREIGN KEY (`program_id`) REFERENCES `programs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints der Tabelle `mission_progress`
+--
+ALTER TABLE `mission_progress`
+  ADD CONSTRAINT `mission_progress_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints der Tabelle `player_devices`
