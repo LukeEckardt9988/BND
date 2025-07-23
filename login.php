@@ -11,6 +11,7 @@ if (!isset($pdo)) {
 
 $message = '';
 
+// Prüft, ob das Formular abgeschickt wurde
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
@@ -18,42 +19,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($username) || empty($password)) {
         $message = 'Beide Felder sind erforderlich.';
     } else {
+        // Schritt 1: Hole den User aus der Datenbank
         $sql = "SELECT id, username, password_hash FROM users WHERE username = :username";
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':username', $username, PDO::PARAM_STR);
         $stmt->execute();
-
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        // Schritt 2: Überprüfe, ob der User existiert und das Passwort korrekt ist
         if ($user && password_verify($password, $user['password_hash'])) {
-            // Passwort ist korrekt, Session starten
+            // ERFOLG! Passwort ist korrekt.
+
+            // Session starten
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
 
-            // --- Logik zum Erstellen der Willkommens-E-Mail ---
+            // --- Logik zum Erstellen der ersten Mission ---
             $user_id = $user['id'];
 
-            // 1. Prüfen, ob der User die Willkommens-Mail schon hat
-            $stmt_check = $pdo->prepare("SELECT COUNT(*) FROM emails WHERE recipient_id = :user_id AND sender_id = 100");
+            // Prüfen, ob der User die Mission 1 schon gestartet hat
+            $stmt_check = $pdo->prepare("SELECT COUNT(*) FROM mission_progress WHERE user_id = :user_id AND mission_id = 1");
             $stmt_check->execute([':user_id' => $user_id]);
-            $email_exists = $stmt_check->fetchColumn();
+            $mission_exists = $stmt_check->fetchColumn();
 
-            if ($email_exists == 0) {
-                // 2. Wenn nicht, Willkommens-Mail erstellen
-                $sql_welcome = "INSERT INTO emails (recipient_id, sender_id, sender_name, sender_email, subject, body_html, sent_at)
-                                VALUES (:user_id, 100, 'Ausbilder Schmidt', 'schmidt@bnd.de', 'Willkommen beim BND, Rekrut!', 'Willkommen bei der Cyber-Abwehr. Ihre erste Aufgabe wartet auf Sie. Machen Sie sich mit dem System vertraut. Weitere Anweisungen folgen in Kürze.', NOW())";
-                $pdo->prepare($sql_welcome)->execute([':user_id' => $user_id]);
+            if ($mission_exists == 0) {
+                // Wenn nicht, erste Missions-Mail erstellen
+                $body = "Willkommen bei der Cyber-Abwehr, Rekrut.\n\nIhre erste Aufgabe ist eine simple Aufklärungsmission. Wir haben verdächtige Aktivitäten in unserem Trainings-Netzwerk (10.2.2.0/24) festgestellt. Ihre Aufgabe ist es, sich einen Überblick zu verschaffen.\n\n**Ihr Befehl: `nmap -sn 10.2.2.0/24`**\n\nFühren Sie diesen Befehl in Ihrer Konsole aus und melden Sie alle Anomalien.\n\nSchmidt, Ausbilder";
 
-                // 3. Erste Mission für den Spieler in der Progress-Tabelle anlegen
-                $sql_mission = "INSERT INTO mission_progress (user_id, mission_id, current_step) VALUES (:user_id, 1, 1)";
-                $pdo->prepare($sql_mission)->execute([':user_id' => $user_id]);
+                $sql_mission_mail = "INSERT INTO emails (recipient_id, sender_id, sender_name, sender_email, subject, body_html, sent_at)
+                                     VALUES (:user_id, 100, 'Ausbilder Schmidt', 'schmidt@bnd.de', 'Erste Mission: Netzwerkaufklärung', :body, NOW())";
+                $pdo->prepare($sql_mission_mail)->execute([':user_id' => $user_id, ':body' => $body]);
+
+                // Erste Mission für den Spieler in der Progress-Tabelle anlegen
+                $sql_mission_start = "INSERT INTO mission_progress (user_id, mission_id, current_step) VALUES (:user_id, 1, 1)";
+                $pdo->prepare($sql_mission_start)->execute([':user_id' => $user_id]);
             }
-            // --- Ende der E-Mail-Logik ---
 
-            // KORREKTUR: Weiterleitung zur desktop.php
+            // Weiterleitung zum Desktop
             header("Location: desktop.php");
             exit;
         } else {
+            // FEHLER! Falscher Codename oder falsches Passwort.
             $message = 'Falscher Codename oder falsches Passwort.';
         }
     }
