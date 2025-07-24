@@ -4,7 +4,51 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
-require 'db_connect.php';
+require 'db_connect.php'; // Stellen Sie sicher, dass db_connect.php korrekt eingebunden ist
+
+$user_id = $_SESSION['user_id'];
+$initial_console_message = '';
+
+try {
+    // Prüfen, ob der Benutzer eine aktive Mission hat
+    $stmt = $pdo->prepare("SELECT mission_id, current_step FROM mission_progress WHERE user_id = :user_id AND status = 'active'");
+    $stmt->execute([':user_id' => $user_id]);
+    $active_mission = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$active_mission) {
+        // Benutzer hat keine aktive Mission, also ist es ein neuer Start oder Mission abgeschlossen.
+        // E-Mail 1 (erste Mission) an den Benutzer senden, falls noch nicht geschehen
+        $stmt_check_email = $pdo->prepare("SELECT id FROM emails WHERE id = 1 AND recipient_id = :user_id");
+        $stmt_check_email->execute([':user_id' => $user_id]);
+        $email_sent = $stmt_check_email->fetch(PDO::FETCH_ASSOC);
+
+        if (!$email_sent) {
+            // E-Mail senden (recipient_id setzen)
+            // Dies ist der "Startschuss" für den Spieler, um die Mission zu initiieren
+            $stmt_send_email = $pdo->prepare("UPDATE emails SET recipient_id = :user_id, is_read = 0, sent_at = NOW() WHERE id = 1");
+            $stmt_send_email->execute([':user_id' => $user_id]);
+            $initial_console_message = "Willkommen, Rekrut! Eine neue E-Mail wartet in Ihrem Posteingang. Überprüfen Sie diese für Ihre erste Mission.<br>Geben Sie '<b>start training</b>' ein, um Ihre Ausbildung zu beginnen.";
+        } else {
+            // E-Mail wurde bereits gesendet, aber Mission noch nicht gestartet
+            $initial_console_message = "Willkommen zurück, Rekrut! Ihre erste Mission wartet. Überprüfen Sie Ihre E-Mails oder geben Sie '<b>start training</b>' ein, um zu beginnen.";
+        }
+    } else {
+        // Benutzer hat eine aktive Mission, normale Anzeige
+        $initial_console_message = "Willkommen zurück, Rekrut! Ihre aktuelle Mission: Level " . $active_mission['mission_id'] . ", Schritt " . $active_mission['current_step'] . ".";
+        // Hier keine Beschreibung aus mission_steps laden, da Briefing per E-Mail kommt.
+        // Optional könnte man hier eine kurze Erinnerung an die Aufgabe einfügen, falls gewünscht.
+        // Beispiel:
+        $stmt_step_desc = $pdo->prepare("SELECT description FROM mission_steps WHERE mission_id = :mid AND step_number = :snum");
+        $stmt_step_desc->execute([':mid' => $active_mission['mission_id'], ':snum' => $active_mission['current_step']]);
+        $step_description = $stmt_step_desc->fetchColumn();
+        if ($step_description) {
+            $initial_console_message .= "<br>Aktuelle Aufgabe: " . htmlspecialchars($step_description);
+        }
+    }
+} catch (PDOException $e) {
+    error_log("Database error in desktop.php: " . $e->getMessage());
+    $initial_console_message = "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.";
+}
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -29,7 +73,7 @@ require 'db_connect.php';
             <img src="https://img.icons8.com/ios-filled/100/00ff7f/internet.png" alt="browser" />
             <span>Browser</span>
         </div>
-        
+
 
         <div id="console-window" class="window-container hidden">
             <div class="window-header"><span>BND Secure Terminal</span><button class="win-btn" data-window-id="console-window">X</button></div>
@@ -207,18 +251,67 @@ require 'db_connect.php';
 
             const consoleInput = document.getElementById('console-input');
             const consoleOutput = document.getElementById('console-output');
+            let isTyping = false; // Flag to prevent multiple command executions
+
+            // Initial console message on desktop load
+            const initialMessage = `<?php echo addslashes($initial_console_message); ?>`; // PHP-Variable in JS übergeben
+            if (initialMessage) {
+                setTimeout(() => {
+                    typewriterEffect(initialMessage, consoleOutput, () => {
+                        consoleInput.disabled = false;
+                        consoleInput.focus();
+                    });
+                }, 500); // Kleine Verzögerung für den Effekt
+            } else {
+                consoleInput.disabled = false; // Input sofort aktivieren, wenn keine Init-Nachricht
+                consoleInput.focus();
+            }
+
+
+            // Function for typewriter effect
+            function typewriterEffect(text, targetElement, onComplete) {
+                isTyping = true;
+                if (targetElement.innerHTML.trim() !== '') {
+                    targetElement.innerHTML += '<br>';
+                }
+
+                const lines = text.split('<br>');
+                let lineIndex = 0;
+                // Die gewünschte helle Farbe für die Ausgabe
+                const outputColor = '#f0e68c';
+
+                const interval = setInterval(() => {
+                    if (lineIndex < lines.length) {
+                        // Wickeln Sie die Ausgabelinie in ein Span-Tag mit der gewünschten Farbe ein
+                        targetElement.innerHTML += `<span style="color: ${outputColor};">${lines[lineIndex]}</span><br>`;
+                        targetElement.scrollTop = targetElement.scrollHeight;
+                        lineIndex++;
+                    } else {
+                        clearInterval(interval);
+                        isTyping = false;
+                        if (onComplete) onComplete();
+                    }
+                }, 50);
+            }
+
+
             consoleInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    const command = consoleInput.value;
-                    if (command.trim() === '') return;
+                if (e.key === 'Enter' && !isTyping) {
+                    const command = consoleInput.value.trim();
+                    if (command === '') return;
+
                     consoleOutput.innerHTML += `<br><span style="color: #f0e68c;">> ${command}</span><br>`;
                     consoleInput.value = '';
+                    consoleInput.disabled = true; // Disable input while processing
+
                     if (command.toLowerCase() === 'clear') {
                         consoleOutput.innerHTML = '';
+                        consoleInput.disabled = false;
                         return;
                     }
 
-                    fetch('api_console.php', {
+                    // Send command to the new central API
+                    fetch('api_game_command.php', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -227,27 +320,48 @@ require 'db_connect.php';
                         })
                         .then(response => response.json())
                         .then(data => {
-                            const formattedOutput = data.output.replace(/\n/g, '<br>');
-                            consoleOutput.innerHTML += `<span style="color: #00ff7f;">${formattedOutput}</span>`;
-                            consoleOutput.scrollTop = consoleOutput.scrollHeight;
-
-                            fetch('api_check_command.php', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/x-www-form-urlencoded'
-                                    },
-                                    body: 'command=' + encodeURIComponent(command)
-                                })
-                                .then(triggerResponse => triggerResponse.json())
-                                .then(triggerData => {
-                                    if (triggerData.status === 'show_notification') {
-                                        showNotification(triggerData.data.title, triggerData.data.message);
+                            if (data.console_output) {
+                                typewriterEffect(data.console_output.replace(/\n/g, '<br>'), consoleOutput, () => {
+                                    consoleInput.disabled = false; // Re-enable input after typing
+                                    consoleInput.focus();
+                                    // Handle notifications if any
+                                    if (data.notification) {
+                                        showNotification(data.notification.title, data.notification.message);
+                                    }
+                                    // Handle unlocked programs (e.g., add new icons or update toolbox)
+                                    if (data.unlocked_program) {
+                                        showNotification('Neues Programm freigeschaltet!', `${data.unlocked_program.name}: ${data.unlocked_program.description}`);
+                                    }
+                                    // If an email was sent, reload emails frame
+                                    if (data.email_sent) {
+                                        const emailsIframe = document.querySelector('#emails-window iframe');
+                                        if (emailsIframe && emailsIframe.contentWindow) {
+                                            emailsIframe.contentWindow.location.reload();
+                                        }
+                                    }
+                                    // If a mission step was completed or status changed,
+                                    // and the browser window is showing a mission page, reload it.
+                                    // This requires the browser iframe to be opened on levelX.php
+                                    // In this new setup, we don't have mission_briefing.php, but if you introduce
+                                    // other dynamic pages, this could be useful.
+                                    if (data.reload_iframe_id) {
+                                        const targetIframe = document.querySelector(`#${data.reload_iframe_id} iframe`);
+                                        if (targetIframe && targetIframe.contentWindow) {
+                                            targetIframe.contentWindow.location.reload();
+                                        }
                                     }
                                 });
+                            } else {
+                                consoleInput.disabled = false; // Re-enable input even if no output
+                                consoleInput.focus();
+                            }
                         })
                         .catch(error => {
-                            consoleOutput.innerHTML += '<br>FATAL: Verbindung zum Command-Server verloren.';
-                            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+                            typewriterEffect('FATAL: Verbindung zum Game-Server verloren.', consoleOutput, () => {
+                                consoleInput.disabled = false;
+                                consoleInput.focus();
+                            });
+                            console.error('API call failed:', error);
                         });
                 }
             });

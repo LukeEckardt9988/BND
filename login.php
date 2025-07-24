@@ -26,24 +26,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
 
-            $user_id = $user['id'];
+            // Missions- und E-Mail-Startlogik wurde verschoben!
+            // Dies wird jetzt von start.php (für die allererste Email)
+            // und api_game_command.php / levelX.php-Logik behandelt.
 
-            // Prüfen, ob der User die Mission 1 schon gestartet hat
-            $stmt_check_mission_progress = $pdo->prepare("SELECT COUNT(*) FROM mission_progress WHERE user_id = :user_id AND mission_id = 1");
-            $stmt_check_mission_progress->execute([':user_id' => $user_id]);
-            $mission_exists = $stmt_check_mission_progress->fetchColumn();
-
-            if ($mission_exists == 0) {
-                // Wenn nicht, die erste Missions-Mail (ID 101) für den Spieler verfügbar machen
-                // Hier aktualisieren wir die E-Mail, sodass sie an den eingeloggten Benutzer geht.
-                $stmt_update_mission_email = $pdo->prepare("UPDATE emails SET recipient_id = :user_id, is_read = 0 WHERE id = 101");
-                $stmt_update_mission_email->execute([':user_id' => $user_id]);
-
-                // Erste Mission für den Spieler in der Progress-Tabelle anlegen
-                $sql_mission_start = "INSERT INTO mission_progress (user_id, mission_id, current_step) VALUES (:user_id, 1, 1)";
-                $pdo->prepare($sql_mission_start)->execute([':user_id' => $user_id]);
-            }
-            // Weiterleitung zum Desktop
             header("Location: desktop.php");
             exit;
         } else {

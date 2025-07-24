@@ -3,7 +3,7 @@
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('DB_NAME', 'cia_game');
+define('DB_NAME', 'bnd'); // <--- Hier den Datenbanknamen auf BND ändern
 
 // Erstellt eine Datenbankverbindung mit PDO
 try {
