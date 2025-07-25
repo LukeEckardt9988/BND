@@ -23,6 +23,26 @@
       color: white;
       cursor: pointer;
       margin-bottom: 20px;
+      position: relative;
+  }
+
+  .badge {
+      position: absolute;
+      top: -5px;
+      right: 10px;
+      background-color: #ff4d4d;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 0.8em;
+      font-weight: bold;
+      border: 1px solid white;
+      display: none;
+      /* Standardmäßig unsichtbar */
+  }
+
+  .badge.visible {
+      display: block;
   }
 
   .desktop-icon img {
@@ -63,7 +83,8 @@
       height: 600px;
       z-index: 100;
   }
-   #browser-window {
+
+  #browser-window {
       top: 100px;
       left: 100px;
       width: 850px;
@@ -278,38 +299,46 @@
 
 
   /* Styling für die Konsolen-Tabs */
-.console-tabs {
-    flex-grow: 1;
-    display: flex;
-}
-.tab-link {
-    padding: 8px 15px;
-    border: none;
-    background-color: #1a1a1a;
-    color: #aaa;
-    cursor: pointer;
-    border-right: 1px solid #333;
-    border-bottom: 1px solid #333;
-}
-.tab-link.active {
-    background-color: #2a2a2a;
-    color: #00ff7f;
-    border-bottom-color: #2a2a2a; /* Lässt den Tab "verbunden" aussehen */
-}
-.console-body {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-.console-instance {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: none; /* Alle Iframes standardmäßig ausblenden */
-}
-.console-instance.active {
-    display: block; /* Nur das aktive Iframe anzeigen */
-}
+  .console-tabs {
+      flex-grow: 1;
+      display: flex;
+  }
+
+  .tab-link {
+      padding: 8px 15px;
+      border: none;
+      background-color: #1a1a1a;
+      color: #aaa;
+      cursor: pointer;
+      border-right: 1px solid #333;
+      border-bottom: 1px solid #333;
+  }
+
+  .tab-link.active {
+      background-color: #2a2a2a;
+      color: #00ff7f;
+      border-bottom-color: #2a2a2a;
+      /* Lässt den Tab "verbunden" aussehen */
+  }
+
+  .console-body {
+      position: relative;
+      width: 100%;
+      height: 100%;
+  }
+
+  .console-instance {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+      /* Alle Iframes standardmäßig ausblenden */
+  }
+
+  .console-instance.active {
+      display: block;
+      /* Nur das aktive Iframe anzeigen */
+  }

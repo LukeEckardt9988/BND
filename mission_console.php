@@ -2,19 +2,12 @@
 session_start();
 require_once 'db_connect.php';
 
-// --- Grundlegende Initialisierung ---
 if (!isset($_SESSION['user_id'])) {
-    exit("Sitzung abgelaufen. Bitte das Fenster schließen und neu einloggen.");
+    exit("Sitzung abgelaufen.");
 }
 $user_id = $_SESSION['user_id'];
 
-if (!isset($_SESSION['mission_context'])) {
-    $_SESSION['mission_context'] = [
-        'history' => [['type' => 'output', 'content' => "Missions-Terminal bereit. 'start training' eingeben, um zu beginnen."]]
-    ];
-}
-
-// --- HILFSFUNKTION ZUM SENDEN VON E-MAILS ---
+// --- Hilfsfunktion zum Senden von E-Mails ---
 if (!function_exists('send_ingame_email')) {
     function send_ingame_email($template_id, $user_id, $pdo)
     {
@@ -39,82 +32,86 @@ if (!function_exists('send_ingame_email')) {
     }
 }
 
+// --- Initialisierung ---
+if (!isset($_SESSION['mission_context'])) {
+    $_SESSION['mission_context'] = ['history' => []];
+    send_ingame_email(1, $user_id, $pdo);
+    $_SESSION['mission_context']['history'][] = ['type' => 'output', 'content' => "Willkommens-E-Mail wurde an Ihr Postfach gesendet.\n'start training' eingeben, um zu beginnen."];
+    $_SESSION['reload_iframe'] = 'emails-iframe';
+}
 
 // --- FORMULAR-VERARBEITUNG ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $command = trim($_POST['command'] ?? '');
-    $_SESSION['mission_context']['history'][] = ['type' => 'input', 'content' => $command];
 
-    $output = "Befehl nicht erkannt: '" . htmlspecialchars($command) . "'";
-
-    // --- SPIELLOGIK ---
-    $stmt = $pdo->prepare("SELECT mission_id, current_step, status FROM mission_progress WHERE user_id = :user_id LIMIT 1");
+    $stmt = $pdo->prepare("SELECT * FROM mission_progress WHERE user_id = :user_id LIMIT 1");
     $stmt->execute([':user_id' => $user_id]);
     $progress = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (strtolower($command) === 'start training') {
-        if (!$progress || $progress['status'] !== 'active') {
-            $mission_id_to_start = 1;
-            $first_step_number = 1;
+    $current_mission_id = $progress ? $progress['mission_id'] : 1;
+    $current_step = $progress ? $progress['current_step'] : 0;
 
-            $stmt_upsert = $pdo->prepare(
-                "INSERT INTO mission_progress (user_id, mission_id, current_step, status) VALUES (:user_id, :mission_id, :step, 'active')
-                 ON DUPLICATE KEY UPDATE mission_id = VALUES(mission_id), current_step = VALUES(current_step), status = 'active'"
-            );
-            $stmt_upsert->execute([':user_id' => $user_id, ':mission_id' => $mission_id_to_start, ':step' => $first_step_number]);
-
-            require_once 'game_logic/level1.php';
-            $step_def = get_level_step_definition($first_step_number);
-            $output = "Level 1 gestartet. Ihre erste Anweisung wurde Ihnen per E-Mail zugesendet.\n\n" .
-                "Aktuelle Aufgabe: " . ($step_def['description_for_display'] ?? "Unbekannt");
-
-            // *** HIER WIRD JETZT DIE E-MAIL GESENDET ***
-            send_ingame_email(1, $user_id, $pdo); // E-Mail mit Template-ID 1 senden
-
-            $_SESSION['reload_iframe'] = 'emails-iframe';
-            $_SESSION['show_notification'] = ['title' => 'Mission Gestartet', 'message' => 'Sie haben eine neue E-Mail erhalten.'];
-        } else {
-            $output = "Training läuft bereits. Sie sind in Mission " . $progress['mission_id'] . ".";
-        }
-    } elseif ($progress && $progress['status'] === 'active') {
-        $level_file = 'game_logic/level' . $progress['mission_id'] . '.php';
-        if (file_exists($level_file)) {
-            require_once $level_file;
-            $response = handle_level_command($user_id, $command, $progress['mission_id'], $progress['current_step'], $pdo);
-            $output = $response['console_output'];
-
-            if ($response['success']) {
-                if (!empty($response['notification_title'])) {
-                    $_SESSION['show_notification'] = ['title' => $response['notification_title'], 'message' => $response['notification_message']];
-                }
-                if (!empty($response['email_id_to_send'])) {
-                    // *** HIER WIRD JETZT DIE E-MAIL GESENDET ***
-                    send_ingame_email($response['email_id_to_send'], $user_id, $pdo);
-                    $_SESSION['reload_iframe'] = 'emails-iframe';
-                }
-
-                if ($response['mission_completed']) {
-                    $stmt_update = $pdo->prepare("UPDATE mission_progress SET status = 'completed' WHERE user_id = :user_id");
-                    $stmt_update->execute([':user_id' => $user_id]);
-                } else {
-                    $stmt_update = $pdo->prepare("UPDATE mission_progress SET current_step = :next_step WHERE user_id = :user_id");
-                    $stmt_update->execute([':next_step' => $response['next_step_id'], ':user_id' => $user_id]);
-                }
-            }
-        } else {
-            $output = "SYSTEMFEHLER: Logik-Datei für Mission " . $progress['mission_id'] . " nicht gefunden.";
-        }
+    $level_file = 'game_logic/level' . $current_mission_id . '.php';
+    if (file_exists($level_file)) {
+        require_once $level_file;
+        $response = handle_level_command($user_id, $command, $current_mission_id, $current_step, $pdo);
     }
 
+    if (($response['success'] ?? false) && ($response['expected_command'] ?? '') === 'clear') {
+        $_SESSION['mission_context']['history'] = [];
+    } else {
+        $_SESSION['mission_context']['history'][] = ['type' => 'input', 'content' => $command];
+    }
+
+    $output = $response['console_output'] ?? "Befehl nicht erkannt: '" . htmlspecialchars($command) . "'";
     $_SESSION['mission_context']['history'][] = ['type' => 'output', 'content' => $output];
+
+    if ($response['success'] ?? false) {
+        // Events auslösen
+        if (!empty($response['notification_title'])) {
+            $_SESSION['show_notification'] = ['title' => $response['notification_title'], 'message' => $response['notification_message']];
+        }
+        if (!empty($response['email_id_to_send'])) {
+            send_ingame_email($response['email_id_to_send'], $user_id, $pdo);
+            $_SESSION['reload_iframe'] = 'emails-iframe';
+        }
+        if (!empty($response['delayed_action'])) {
+            $_SESSION['delayed_action'] = $response['delayed_action'];
+        }
+
+        // --- HIER IST DER FINALE, ROBUSTE FIX ---
+        // Fortschritt in der DB aktualisieren
+        if ($response['mission_completed'] ?? false) {
+            // Mission als abgeschlossen markieren
+            $stmt = $pdo->prepare("UPDATE mission_progress SET status = 'completed' WHERE user_id = :uid");
+            $stmt->execute([':uid' => $user_id]);
+        } elseif (isset($response['next_step_id'])) {
+            $next_step = $response['next_step_id'];
+
+            if ($progress) {
+                // Wenn ein Fortschritt existiert, aktualisiere ihn (Normalfall)
+                $stmt = $pdo->prepare("UPDATE mission_progress SET current_step = :step, status = 'active' WHERE user_id = :uid");
+                $stmt->execute([':step' => $next_step, ':uid' => $user_id]);
+            } else {
+                // Wenn kein Fortschritt existiert (nur bei 'start training'), erstelle einen neuen Eintrag
+                $stmt = $pdo->prepare("INSERT INTO mission_progress (user_id, mission_id, current_step, status) VALUES (:uid, :mid, :step, 'active')");
+                $stmt->execute([':uid' => $user_id, ':mid' => $current_mission_id, ':step' => $next_step]);
+            }
+        }
+        // --- ENDE DES FIXES ---
+    }
+
     header("Location: mission_console.php");
     exit();
 }
 
+// Session-Variablen für JavaScript holen und danach löschen
 $notification_to_show = $_SESSION['show_notification'] ?? null;
 unset($_SESSION['show_notification']);
 $iframe_to_reload = $_SESSION['reload_iframe'] ?? null;
 unset($_SESSION['reload_iframe']);
+$delayed_action = $_SESSION['delayed_action'] ?? null;
+unset($_SESSION['delayed_action']);
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -188,19 +185,16 @@ unset($_SESSION['reload_iframe']);
             <?php endif; ?>
         <?php endforeach; ?>
     </div>
-
     <div class="input-line">
         <span class="prompt">BND:\MISSIONS></span>
         <span id="live-input" contenteditable="false"></span>
         <span id="cursor">&nbsp;</span>
     </div>
-
     <form id="command-form" method="POST" action="mission_console.php" style="display:none;">
         <input type="hidden" name="command" id="command-input">
     </form>
-
     <script>
-        // Das JavaScript bleibt exakt wie in der vorherigen Version
+        // Dein JavaScript bleibt hier unverändert...
         const liveInput = document.getElementById('live-input');
         const form = document.getElementById('command-form');
         const hiddenInput = document.getElementById('command-input');
@@ -223,15 +217,20 @@ unset($_SESSION['reload_iframe']);
 
         window.scrollTo(0, document.body.scrollHeight);
 
-        <?php if ($notification_to_show || $iframe_to_reload): ?>
-            if (window.parent) {
-                <?php if ($notification_to_show): ?>
-                    window.parent.showNotification('<?php echo addslashes($notification_to_show['title']); ?>', '<?php echo addslashes($notification_to_show['message']); ?>');
-                <?php endif; ?>
-                <?php if ($iframe_to_reload): ?>
-                    window.parent.reloadIframe('<?php echo $iframe_to_reload; ?>');
-                <?php endif; ?>
-            }
+        <?php if ($notification_to_show): ?>
+            window.parent.showNotification('<?php echo addslashes($notification_to_show['title']); ?>', '<?php echo addslashes($notification_to_show['message']); ?>');
+        <?php endif; ?>
+
+        <?php if ($iframe_to_reload): ?>
+            window.parent.reloadIframe('<?php echo $iframe_to_reload; ?>');
+        <?php endif; ?>
+
+        <?php if ($delayed_action): ?>
+            window.parent.triggerDelayedAction(
+                <?php echo $delayed_action['delay']; ?>,
+                '<?php echo $delayed_action['action']; ?>',
+                <?php echo json_encode($delayed_action['data']); ?>
+            );
         <?php endif; ?>
     </script>
 </body>
