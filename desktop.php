@@ -43,10 +43,10 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
                 <button class="win-btn" data-window-id="console-window">X</button>
             </div>
-            <div class="window-content" style="padding:0; background-color: #131313;">
+            <div class="window-content" style="padding:0; border-radius: 10px; background-color: #131313;">
                 <div class="console-body">
-                    <iframe id="missions-console-iframe" class="console-instance active" src="mission_console.php"></iframe>
-                    <iframe id="trainee-console-iframe" class="console-instance" src="trainee_console.php"></iframe>
+                    <iframe id="missions-console-iframe" class="console-instance active" src="mission_console.php" style="padding:0; border-radius: 10px; background-color: #131313;"></iframe>
+                    <iframe id="trainee-console-iframe" class="console-instance" src="trainee_console.php" style="padding:0; border-radius: 10px; background-color: #131313;"></iframe>
                 </div>
             </div>
             <div class="resizer top-left"></div>
@@ -61,7 +61,7 @@ if (!isset($_SESSION['user_id'])) {
 
         <div id="emails-window" class="window-container hidden">
             <div class="window-header"><span>Posteingang</span><button class="win-btn" data-window-id="emails-window">X</button></div>
-            <div class="window-content" style="padding:0;"><iframe id="emails-iframe" src="emails.php" style="width:100%; height:100%; border:none;"></iframe></div>
+            <div class="window-content" style="padding:0;"><iframe id="emails-iframe" src="emails.php" style="width:100%; height:100%; border-radius: 10px; border:none;"></iframe></div>
             <div class="resizer top-left"></div>
             <div class="resizer top-right"></div>
             <div class="resizer bottom-left"></div>
@@ -74,7 +74,7 @@ if (!isset($_SESSION['user_id'])) {
 
         <div id="browser-window" class="window-container hidden">
             <div class="window-header"><span>BND Intranet Browser</span><button class="win-btn" data-window-id="browser-window">X</button></div>
-            <div class="window-content" style="padding:0;"><iframe id="browser-iframe" src="browser.php?page=start.html" style="width:100%; height:100%; border:none;"></iframe></div>
+            <div class="window-content" style="padding:0;"><iframe id="browser-iframe" src="browser.php?page=start.html" style="width:100%; height:100%; border-radius: 10px; border:none;"></iframe></div>
             <div class="resizer top-left"></div>
             <div class="resizer top-right"></div>
             <div class="resizer bottom-left"></div>

@@ -122,7 +122,7 @@ unset($_SESSION['delayed_action']);
     <style>
         body,
         html {
-            font-family: 'Courier New', monospace;
+            font-family: Consolas, 'Cascadia Code', 'Ubuntu Mono', Menlo, Monaco, 'Courier New', monospace;
             background-color: #131313;
             color: #e0e0e0;
             padding: 10px;
